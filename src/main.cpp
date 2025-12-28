@@ -1,16 +1,58 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "models.hpp"
+
+void resizeCallback(GLFWwindow*, int width, int height){
+    glViewport(0, 0, width, height);
+}
+void cursorMovedCallback(GLFWwindow* window, double x, double y){
+    std::cout << "Cursor moved: x: " << x <<  std::endl << "y: " << y << std::endl; 
+}
+
+void processInput(GLFWwindow* window){
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+    
+}
 
 int main(){
 
+    dimensions viewport = {800, 600}; 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    _sleep(1000);
+    GLFWwindow* window = glfwCreateWindow(viewport.width,viewport.height, "Scratchpad", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl; 
+        return -1;
+    }
+    glViewport(0,0, viewport.width, viewport.height); 
+    glfwSetFramebufferSizeCallback(window, resizeCallback);
+    glfwSetCursorPosCallback(window, cursorMovedCallback);
+    
 
+    while (!glfwWindowShouldClose(window))
+    {
+        processInput(window);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+
+    glfwTerminate();
     return 0;
 }
