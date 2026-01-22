@@ -16,8 +16,7 @@
                 "src/glad.c",
                 "-lglfw3dll",
                 "-o",
-                "${workspaceFolder}/build/Debug/outDebug/scratchpad.exe",
-                "-mwindows"
+                "${workspaceFolder}/build/Debug/outDebug/scratchpad.exe"
             ],
             "problemMatcher": [
                 "$gcc"
