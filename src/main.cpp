@@ -69,8 +69,7 @@ void createShader(unsigned int* shaderProgram){
     glDeleteShader(fragmentShader);
 }
 
-const unsigned int selectShape(const Shape shape, float** vertices){
-    unsigned int siz = -1;
+void selectShape(const Shape shape, float** vertices, unsigned int** indices, unsigned int** sizes){
     switch (shape)
     {
     case TRIANGLE:
@@ -80,7 +79,12 @@ const unsigned int selectShape(const Shape shape, float** vertices){
             0.5f, -0.5f, 0.0f,
             0.0f,  0.5f, 0.0f 
         };
-        siz = 9;
+        *indices = new unsigned int[3]{
+            0,1,2
+        };
+        *sizes = new unsigned int[2]{
+            9,3
+        };
         break;
     
     case RECTANGLE:
@@ -91,7 +95,13 @@ const unsigned int selectShape(const Shape shape, float** vertices){
            -0.5f, -0.5f, 0.0f,
            -0.5f,  0.5f, 0.0f
         };
-        siz = 12;
+        *indices = new unsigned int[6]{
+            0,1,3,
+            1,2,3
+        };
+        *sizes = new unsigned int[2]{
+            12,6
+        };
         break;
     default:
         *vertices = new float[9]
@@ -100,32 +110,37 @@ const unsigned int selectShape(const Shape shape, float** vertices){
             0.5f, -0.5f, 0.0f,
             0.0f,  0.5f, 0.0f 
         };
-        siz = 9;
         break;
     }
-    return siz;
 }
 
-void renderShape(unsigned int* VAO, unsigned int* VBO){
+void renderShape(unsigned int* VAO, unsigned int* VBO, unsigned int* EBO){
 
     float* vertices;
-    unsigned int siz = selectShape(TRIANGLE, &vertices);
+    unsigned int* indices, *sizes;
+    selectShape(TRIANGLE, &vertices, &indices, &sizes);
 
-    if (siz == -1) std::cout << "Error getting size of shape" << std::endl;
 
     glGenVertexArrays(1, VAO);
     glGenBuffers(1,VBO);
+    glGenBuffers(1, EBO);
     glBindVertexArray(*VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, *VBO);
-    glBufferData(GL_ARRAY_BUFFER, siz * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizes[0] * sizeof(float), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizes[1] * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
 
     glBindVertexArray(0);
+    delete(vertices);
+    delete(indices);
+    delete(sizes);
 }
 
 int main(){
@@ -155,9 +170,13 @@ int main(){
     
 
 
-    unsigned int VBO, VAO, shaderProgram;
+    unsigned int VBO, VAO,EBO, shaderProgram;
     createShader(&shaderProgram);
-    renderShape(&VAO, &VBO);
+    renderShape(&VAO, &VBO, &EBO);
+
+
+
+
 
     char in;
     bool render = false;
@@ -170,7 +189,7 @@ int main(){
         glBindVertexArray(VAO);
 
         if (render){
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
         
         
@@ -180,6 +199,7 @@ int main(){
     
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();
