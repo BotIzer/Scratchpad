@@ -69,6 +69,45 @@ void createShader(unsigned int* shaderProgram){
     glDeleteShader(fragmentShader);
 }
 
+void createShader2(unsigned int* shaderProgram){
+
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &basicShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &yellowShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    *shaderProgram = glCreateProgram();
+    glAttachShader(*shaderProgram, vertexShader);
+    glAttachShader(*shaderProgram, fragmentShader);
+    glLinkProgram(*shaderProgram);
+
+    glGetProgramiv(*shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(*shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+}
 void selectShape(const Shape shape, float** vertices, unsigned int** indices, unsigned int** sizes){
     switch (shape)
     {
@@ -226,8 +265,9 @@ int main(){
     glfwSetCursorPosCallback(window, cursorMovedCallback);
 
     unsigned int VBO, VAO,EBO, shaderProgram;
-    unsigned int VBO2, VAO2, EBO2;
+    unsigned int VBO2, VAO2, EBO2, yellowShaderProgram;
     createShader(&shaderProgram);
+    createShader2(&yellowShaderProgram);
     //renderShape(&VAO, &VBO, &EBO);
     renderShape2(&VAO, &VBO, &EBO, &VAO2, &VBO2, &EBO2);
 
@@ -238,11 +278,12 @@ int main(){
         processInput(window, &render);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderProgram);
 
         if (render){
+            glUseProgram(shaderProgram);
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+            glUseProgram(yellowShaderProgram);
             glBindVertexArray(VAO2);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
         }
@@ -258,6 +299,7 @@ int main(){
     glDeleteBuffers(1, &VBO2);
     glDeleteBuffers(1, &EBO2);
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(yellowShaderProgram);
 
     glfwTerminate();
     return 0;

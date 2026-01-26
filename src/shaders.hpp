@@ -15,6 +15,13 @@ const char* fragmentShaderSource =" #version 330 core\n"
 "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\0"; 
 
+const char* yellowShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"    FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+"}\0"; 
+
 void checkCompileErrors(const unsigned int vertexShader, const unsigned int shaderProgram){
     int success;
     char infoLog[512];
