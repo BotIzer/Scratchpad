@@ -5,7 +5,7 @@
 #include "models.hpp"
 #include "shaders.hpp"
 
-const char* SHADER_PATH = "../resources/shaders";
+const std::string SHADER_PATH = "./resources/shaders/";
 
 void resizeCallback(GLFWwindow*, int width, int height){
     glViewport(0, 0, width, height);
@@ -133,7 +133,7 @@ int main(){
 
     unsigned int VBO, VAO,EBO;
     renderShape(&VAO, &VBO, &EBO);
-    Shader shader("./resources/shaders/vertex.vs", "./resources/shaders/fragment.fs");
+    Shader shader((SHADER_PATH + "vertexUpDown.vs").c_str(), (SHADER_PATH + "fragment.fs").c_str());
 
 
     char in;
@@ -144,6 +144,7 @@ int main(){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shader.use();
+        shader.setFloat("offset", 0.5f);
         if (render){
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
